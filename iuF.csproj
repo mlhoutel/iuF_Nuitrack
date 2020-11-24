@@ -5,4 +5,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="nuitrack.net">
+      <HintPath>Nuitrack\nuitrack.net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
