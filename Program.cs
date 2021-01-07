@@ -6,8 +6,8 @@ namespace iuF
     {
         static void Main()
         {
-            Console.WriteLine("Hello World!");
-            Sensor sensor = new Sensor();
+            Streamer streamer = new Streamer("127.0.0.1");
+            Reader sensor = new Reader(streamer);
             sensor.Run();
         }
     }
