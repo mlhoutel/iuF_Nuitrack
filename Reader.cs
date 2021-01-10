@@ -254,7 +254,7 @@ namespace iuF {
 		private void ExtractJoints() {
 			if (_skeletonData != null) {
 				int nb_skeletons = _skeletonData.NumUsers;
-				int size_joint = 2 * sizeof(int) + 3 * sizeof(float);
+				int size_joint = 1 * sizeof(int) + 3 * sizeof(float);
 				int size_skeletons = nb_skeletons * 25 * size_joint;
 
 				_joints = new byte[size_skeletons];
@@ -262,15 +262,15 @@ namespace iuF {
 					Skeleton skeleton = _skeletonData.Skeletons[i];
 					for (int j = 0; j < skeleton.Joints.Length; j++) {
 						Joint joint = skeleton.Joints[j];
-						Console.WriteLine("[{0}] Type: {1} ({2}, {3}, {4})", i, joint.Type, joint.Proj.X, joint.Proj.Y, joint.Proj.Z);
+						//Console.WriteLine("[{0}] Type: {1} ({2}, {3}, {4})", i, joint.Type, joint.Proj.X, joint.Proj.Y, joint.Proj.Z);
 
-						byte[] user_id = BitConverter.GetBytes(j);
+						//byte[] user_id = BitConverter.GetBytes(j);
 						byte[] joint_type = BitConverter.GetBytes((int)joint.Type);
 						byte[] joint_x = BitConverter.GetBytes(joint.Proj.X);
 						byte[] joint_y = BitConverter.GetBytes(joint.Proj.Y);
 						byte[] joint_z = BitConverter.GetBytes(joint.Proj.Z);
 
-						Array.Copy(user_id, _joints, user_id.Length);
+						//Array.Copy(user_id, _joints, user_id.Length);
 						Array.Copy(joint_type, _joints, joint_type.Length);
 						Array.Copy(joint_x, _joints, joint_x.Length);
 						Array.Copy(joint_y, _joints, joint_y.Length);
@@ -283,7 +283,7 @@ namespace iuF {
 		private void ExtractPixels() {
 			if (_depthFrame != null && _colorFrame != null) {
 				int nb_pixels = _configVideo.height * _configVideo.width;
-				int size_pixel = 9; // Depth:  [3 * 2 bytes], Color: [3 * 1 bytes]
+				int size_pixel = 15; // Depth:  [3 * 4 bytes], Color: [3 * 1 bytes]
 				int size_frame = nb_pixels * size_pixel;
 				_pixels = new byte[size_frame];
 
@@ -299,13 +299,16 @@ namespace iuF {
 						for (int j = 0; j < _configVideo.width; j++) {
 							int index = j + i * _configVideo.width;
 
-							byte[] depth_X = BitConverter.GetBytes((UInt16)i);
-							byte[] depth_Y = BitConverter.GetBytes((UInt16)j);
-							byte[] depth_pos = new byte[6] { depth_X[0], depth_X[1], depth_Y[0], depth_Y[1], depths[depth_cursor], depths[depth_cursor+1] };
+							byte[] depth_X = BitConverter.GetBytes((float)i);
+							byte[] depth_Y = BitConverter.GetBytes((float)j);
+							byte[] depth_Z = BitConverter.GetBytes((float)BitConverter.ToUInt16(new byte[2] { depths[depth_cursor], depths[depth_cursor + 1] }, 0));
+
+							byte[] depth_pos = new byte[4 * 3] { depth_X[0], depth_X[1], depth_X[2], depth_X[3], depth_Y[0], depth_Y[1], depth_Y[2], depth_Y[3], depth_Z[0], depth_Z[1], depth_Z[2], depth_Z[3] };
+
 							depth_cursor += 2; // Only the Depth (uint16) is stored in the depth arraèy
 
 							// Depth [X, Y, Z]
-							for (int k = 0; k < 6; k++) {
+							for (int k = 0; k < 12; k++) {
 								_pixels[pixel_cursor] = depth_pos[k];
 								pixel_cursor++;
 							}
