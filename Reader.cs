@@ -12,26 +12,22 @@ namespace iuF {
 		private Streamer _streamer;
 		private NuitrackDevice _device;
 		private bool _running;
+		private VideoMode _configVideo;
 
 		private DepthSensor _depthSensor;
 		private ColorSensor _colorSensor;
 		private UserTracker _userTracker;
 		private SkeletonTracker _skeletonTracker;
-		private GestureRecognizer _gestureRecognizer;
-		private HandTracker _handTracker;
 
 		private DepthFrame _depthFrame;
+		private ColorFrame _colorFrame;
+		private UserFrame _userFrame;
 		private SkeletonData _skeletonData;
-		private HandTrackerData _handTrackerData;
-		private IssuesData _issuesData;
 
-		private float[] _lhand; // {X, Y, Z} position of the Left hand
-		private float[] _rhand; // {X, Y, Z} position of the Right hand
-		private List<float> _joints; // {User, Type, XReal, YReal, ZReal} position for each joints
+		private byte[] _joints; // {User, Type, XReal, YReal, ZReal} for each joints
+		private byte[] _pixels; // {X, Y, Depth, ColorR, ColorG, ColorB} for each pixel
 
-
-		public Reader(Streamer streamer) {
-			_streamer = streamer;
+		public Reader() {
 			_running = false;
 		}
 
@@ -41,16 +37,20 @@ namespace iuF {
 			Stop();
 		}
 		
-		private void Initialize()
-        {
-			Nuitrack.Init("");
-
+		private void Initialize() {
+			try {
+				Nuitrack.Init("");
+			}
+			catch (nuitrack.Exception exception) {
+				Console.WriteLine("Cannot initialize Nuitrack.");
+				throw exception;
+			}
 			// Select the device
-			SelectDevice();
+			_device = SelectDevice();
 
 			// Select video configurations
-			SelectVideoMode(StreamType.DEPTH);
-			SelectVideoMode(StreamType.COLOR);
+			_configVideo = SelectVideoMode();
+
 
 			// Activate the license
 			ActivateDevice();
@@ -62,7 +62,6 @@ namespace iuF {
 			_colorSensor = ColorSensor.Create();
 			_userTracker = UserTracker.Create();
 			_skeletonTracker = SkeletonTracker.Create();
-			_handTracker = HandTracker.Create();
 
 			// Add modules Events Handlers
 			_depthSensor.OnUpdateEvent += onDepthSensorUpdate;
@@ -71,23 +70,62 @@ namespace iuF {
 			_userTracker.OnNewUserEvent += onUserTrackerNewUser;
 			_userTracker.OnLostUserEvent += onUserTrackerLostUser;
 			_skeletonTracker.OnSkeletonUpdateEvent += onSkeletonUpdate;
-			_handTracker.OnUpdateEvent += onHandTrackerUpdate;
+
+			// Connect to remote
+			_streamer = SelectStreamer();
+
 
 			// Run Nuitrack
 			Nuitrack.Run();
 			_running = true;
-
+			
 			Console.WriteLine("Nuitrack is Running...");
 		}
+		private Streamer SelectStreamer() {
+			Console.Clear();
+			Console.WriteLine("Enter the address to stream to or just press ENTER to select 127.0.0.1:8080");
 
-		private void SelectDevice() {
+			string address = "127.0.0.1";
+			int port = 8080;
+
+			while (true) {
+				string input = Console.ReadLine();
+				bool connecting = false;
+				if (input == "") {
+					address = "127.0.0.1";
+					port = 8080;
+					connecting = true;
+				}
+				string[] inputs = input.Split(':');
+				if (inputs.Length == 2) {
+
+					if (System.Net.IPAddress.TryParse(inputs[0], out System.Net.IPAddress IPtemp) && int.TryParse(inputs[1], out port)) {
+						address = inputs[0];
+						connecting = true;
+					}
+				}
+
+				Console.SetCursorPosition(0, 1); Console.Write(new string(' ', Console.WindowWidth));
+				Console.SetCursorPosition(0, 2); Console.Write(new string(' ', Console.WindowWidth));
+				Console.SetCursorPosition(0, 1);
+
+				if (connecting) {
+					Streamer streamer = new Streamer(address, port);
+					if (streamer.TryConnect()) { return streamer; }
+				} else {
+					Console.WriteLine("Bad entry: the address must be in the format IP.ADDRESS:PORT (ex: 127.0.0.1:8080)");
+				}
+			}
+		}
+
+		private NuitrackDevice SelectDevice() {
 
 			// List availaible devices
 			List<NuitrackDevice> devices = Nuitrack.GetDeviceList();
 			int devices_count = devices.Count;
 
 			Console.Clear();
-			if (devices_count == 0) { Console.WriteLine("Error: there is no connected devices."); return; }
+			if (devices_count == 0) { Console.WriteLine("Error: there is no connected devices."); throw new nuitrack.Exception("Error: there is no connected devices."); }
 			Console.WriteLine("Connected devices:");
 			for (int i = 0; i < devices_count; i++) {
 				Console.WriteLine("Device {0}:\n * Camera name: {1}\n * Serial number: {2}\n * Provider name: {3}\n * Activated: {4}", i, devices[i].GetInfo(DeviceInfoType.DEVICE_NAME), devices[i].GetInfo(DeviceInfoType.SERIAL_NUMBER), devices[i].GetInfo(DeviceInfoType.PROVIDER_NAME), devices[i].GetActivationStatus().ToString());
@@ -97,7 +135,7 @@ namespace iuF {
 			Console.WriteLine("Select a device (Write a number or just press ENTER to select the camera 0 ({0})", devices[0].GetInfo(DeviceInfoType.DEVICE_NAME));
 			int selected = -1;
 			while (selected == -1) {
-				String input = Console.ReadLine();
+                string input = Console.ReadLine();
 				if (input == "") {
 					selected = 0;
 					break;
@@ -118,18 +156,18 @@ namespace iuF {
 					Console.WriteLine("Bad entry: you must write an integer equal or lower than {0}", devices_count - 1);
 				}
 			}
-			_device = devices[selected];
 			Console.WriteLine("Selected device: {0}", selected);
+			return devices[selected];
 		}
 
-		private void SelectVideoMode(StreamType stream) {
-
+		private VideoMode SelectVideoMode() {
+			StreamType stream = StreamType.DEPTH;
 			// List availaible video modes
 			List<VideoMode> modes = _device.GetAvailableVideoModes(stream);
 			int modes_count = modes.Count;
 
 			Console.Clear();
-			if (modes_count == 0) { Console.WriteLine("Error: there is no video mode for this device."); return; }
+			if (modes_count == 0) { Console.WriteLine("Error: there is no video mode for this device."); throw new nuitrack.Exception("Error: there is no video mode for this device."); }
 			Console.WriteLine("Available {0} modes:", stream.ToString());
 			for (int i = 0; i < modes_count; i++) {
 				Console.WriteLine(" * Mode {0}: \t({1}px x {2}px) @ {3}fps", i, modes[i].width, modes[i].height, modes[i].fps);
@@ -139,7 +177,7 @@ namespace iuF {
 			Console.WriteLine("Select a Mode (Write a number or just press ENTER to select the mode 0");
 			int selected = -1;
 			while (selected == -1) {
-				String input = Console.ReadLine();
+				string input = Console.ReadLine();
 				if (input == "") {
 					selected = 0;
 					break;
@@ -160,7 +198,9 @@ namespace iuF {
 					Console.WriteLine("Bad entry: you must write an integer equal or lower than {0}", modes_count - 1);
 				}
 			}
-			_device.SetVideoMode(stream, modes[selected]);
+			_device.SetVideoMode(StreamType.DEPTH, modes[selected]);
+			_device.SetVideoMode(StreamType.COLOR, modes[selected]);
+			return modes[selected];
 		}
 		private void ActivateDevice() {
 			bool device_activated = Convert.ToBoolean(_device.GetActivationStatus());
@@ -173,7 +213,6 @@ namespace iuF {
 			}
 			Console.WriteLine("Activation status: {0}", _device.GetActivationStatus().ToString());
 		}
-
 		public void Stop()
         {
 			// Release Nuitrack and remove all modules
@@ -184,7 +223,6 @@ namespace iuF {
 				_userTracker.OnNewUserEvent -= onUserTrackerNewUser;
 				_userTracker.OnLostUserEvent -= onUserTrackerLostUser;
 				_skeletonTracker.OnSkeletonUpdateEvent -= onSkeletonUpdate;
-				_handTracker.OnUpdateEvent -= onHandTrackerUpdate;
 
 				Nuitrack.Release();
 			}
@@ -194,103 +232,116 @@ namespace iuF {
 			}
 		}
 
-		public void Step()
-        {
-			/*
-			try
-			{
+		public void Step() {
+
+			// We wait for the arrays to be populated
+			try {
+				Nuitrack.WaitUpdate(_depthSensor);
+				Nuitrack.WaitUpdate(_colorSensor);
 				Nuitrack.WaitUpdate(_skeletonTracker);
-				Nuitrack.WaitUpdate(_handTracker);
 			}
-			catch (LicenseNotAcquiredException exception)
-			{
-				Console.WriteLine("LicenseNotAcquired exception. Exception: ", exception);
-				throw exception;
-			}
-			catch (System.Exception exception)
-			{
-				Console.WriteLine("Nuitrack update failed. Exception: ", exception);
-			}
+			catch (LicenseNotAcquiredException exception) { Console.WriteLine("LicenseNotAcquired exception. Exception: {0}", exception.ToString()); }
+			catch (System.Exception exception) { Console.WriteLine("Nuitrack update failed. Exception: {0}", exception.ToString()); }
 
-			// Skeleton joints
-			if (_skeletonData != null)
-			{
-				_joints = new List<float>();
-				for (int i = 0; i < _skeletonData.NumUsers; i++)
-                {
+			// We then format the datas in an array of bytes
+			ExtractJoints();
+			ExtractPixels();
+
+			// Finaly we give the data to the Streamer
+			_streamer.SendSkeleton(_pixels, _skeletonData.Timestamp);
+			_streamer.SendPixels(_pixels, _skeletonData.Timestamp);
+		}
+		private void ExtractJoints() {
+			if (_skeletonData != null) {
+				int nb_skeletons = _skeletonData.NumUsers;
+				int size_joint = 2 * sizeof(int) + 3 * sizeof(float);
+				int size_skeletons = nb_skeletons * 25 * size_joint;
+
+				_joints = new byte[size_skeletons];
+				for (int i = 0; i < nb_skeletons; i++) {
 					Skeleton skeleton = _skeletonData.Skeletons[i];
-					for (int j = 0; j < skeleton.Joints.Length; j++)
-                    {
+					for (int j = 0; j < skeleton.Joints.Length; j++) {
 						Joint joint = skeleton.Joints[j];
-						_joints.Add(i);                  // User Id
-						_joints.Add((float)joint.Type);  // Joint Type 
-						_joints.Add(joint.Proj.X);       // Joint PosX
-						_joints.Add(joint.Proj.Y);       // Joint PosY
-						_joints.Add(joint.Proj.Z);       // Joint Pos2
+						Console.WriteLine("[{0}] Type: {1} ({2}, {3}, {4})", i, joint.Type, joint.Proj.X, joint.Proj.Y, joint.Proj.Z);
 
-					}
-                }
-			}
+						byte[] user_id = BitConverter.GetBytes(j);
+						byte[] joint_type = BitConverter.GetBytes((int)joint.Type);
+						byte[] joint_x = BitConverter.GetBytes(joint.Proj.X);
+						byte[] joint_y = BitConverter.GetBytes(joint.Proj.Y);
+						byte[] joint_z = BitConverter.GetBytes(joint.Proj.Z);
 
-			_streamer.SendSkeleton(_joints);
-			*/
-			/*
-			// Hand pointers
-			if (_handTrackerData != null)
-			{
-				foreach (var userHands in _handTrackerData.UsersHands)
-				{
-					if (userHands.LeftHand != null)
-					{
-						HandContent hand = userHands.LeftHand.Value;
-						_lhand = new int[3] { hand.XReal, hand.YReal, hand.ZReal };
-					}
-
-					if (userHands.RightHand != null)
-					{
-						HandContent hand = userHands.RightHand.Value;
-						int handSize = hand.Click ? 20 : 30;
-						Console.WriteLine(hand.X + "," + hand.Y + " " + handSize);
+						Array.Copy(user_id, _joints, user_id.Length);
+						Array.Copy(joint_type, _joints, joint_type.Length);
+						Array.Copy(joint_x, _joints, joint_x.Length);
+						Array.Copy(joint_y, _joints, joint_y.Length);
+						Array.Copy(joint_z, _joints, joint_z.Length);
 					}
 				}
 			}
-			*/
 		}
 
-        private void onHandTrackerUpdate(HandTrackerData handTrackerData)
-		{
-			if (_handTrackerData != null) { _handTrackerData.Dispose(); }
-			_handTrackerData = (HandTrackerData)handTrackerData.Clone();
+		private void ExtractPixels() {
+			if (_depthFrame != null && _colorFrame != null) {
+				int nb_pixels = _configVideo.height * _configVideo.width;
+				int size_pixel = 9; // Depth:  [3 * 2 bytes], Color: [3 * 1 bytes]
+				int size_frame = nb_pixels * size_pixel;
+				_pixels = new byte[size_frame];
+
+				int depth_cursor = 0;
+				int color_cursor = 0;
+				int pixel_cursor = 0;
+
+				unsafe {
+					byte* depths = (byte*)_depthFrame.Data.ToPointer();
+					byte* colors = (byte*)_colorFrame.Data.ToPointer();
+
+					for (int i = 0; i < _configVideo.height; i++) {
+						for (int j = 0; j < _configVideo.width; j++) {
+							int index = j + i * _configVideo.width;
+
+							byte[] depth_X = BitConverter.GetBytes((UInt16)i);
+							byte[] depth_Y = BitConverter.GetBytes((UInt16)j);
+							byte[] depth_pos = new byte[6] { depth_X[0], depth_X[1], depth_Y[0], depth_Y[1], depths[depth_cursor], depths[depth_cursor+1] };
+							depth_cursor += 2; // Only the Depth (uint16) is stored in the depth arraèy
+
+							// Depth [X, Y, Z]
+							for (int k = 0; k < 6; k++) {
+								_pixels[pixel_cursor] = depth_pos[k];
+								pixel_cursor++;
+							}
+
+							// Color [R, G, B]
+							for (int k = 0; k < 3; k++) {
+								_pixels[pixel_cursor] = colors[color_cursor];
+								color_cursor++;  pixel_cursor++;
+							}
+
+							//Console.WriteLine("[{0}] Depth: ({1}, {2}, {3}) Color: ({4}, {5}, {6})", index, BitConverter.ToUInt16(new byte[] { _pixels[pixel_cursor - 9], _pixels[pixel_cursor - 8] }, 0), BitConverter.ToUInt16(new byte[] { _pixels[pixel_cursor - 7], _pixels[pixel_cursor - 6] }, 0), BitConverter.ToUInt16(new byte[] { _pixels[pixel_cursor - 5], _pixels[pixel_cursor - 4] }, 0), _pixels[pixel_cursor - 3], _pixels[pixel_cursor - 2], _pixels[pixel_cursor - 1]);
+						}
+					}
+				}
+			}
 		}
 
-        private void onSkeletonUpdate(SkeletonData skeletonData)
-		{
+        private void onSkeletonUpdate(SkeletonData skeletonData) {
 			if (_skeletonData != null) { _skeletonData.Dispose(); }
 			_skeletonData = (SkeletonData)skeletonData.Clone();
 		}
 
-        private void onUserTrackerLostUser(int userID) {
-			Console.WriteLine("Lost User {0}", userID);
+        private void onUserTrackerLostUser(int userID) { Console.WriteLine("Lost User {0}", userID); }
+        private void onUserTrackerNewUser(int userID) { Console.WriteLine("New User {0}", userID); }
+        private void onUserTrackerUpdate(UserFrame userFrame) {
+			if (_userFrame != null) { _userFrame.Dispose(); }
+			_userFrame = (UserFrame)userFrame.Clone();
 		}
 
-        private void onUserTrackerNewUser(int userID) {
-			Console.WriteLine("New User {0}", userID);
+        private void onColorSensorUpdate(ColorFrame colorFrame) {
+			if (_colorFrame != null) { _colorFrame.Dispose(); }
+			_colorFrame = (ColorFrame)colorFrame.Clone();
 		}
 
-        private void onUserTrackerUpdate(UserFrame frame)
-        {
-            //throw new NotImplementedException();
-        }
-
-        private void onColorSensorUpdate(ColorFrame frame)
-        {
-            //throw new NotImplementedException();
-        }
-
-        private void onDepthSensorUpdate(DepthFrame depthFrame)
-        {
-			if (_depthFrame != null)
-				_depthFrame.Dispose();
+        private void onDepthSensorUpdate(DepthFrame depthFrame){
+			if (_depthFrame != null) {_depthFrame.Dispose(); }
 			_depthFrame = (DepthFrame)depthFrame.Clone();
 		}
     }
