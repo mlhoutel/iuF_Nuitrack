@@ -40,18 +40,21 @@ namespace iuF
 
         public void SendSkeleton(byte[] joints, ulong timestamp) {
             byte[] buffer;
+            byte[] time = BitConverter.GetBytes((Int64)timestamp);
+
             int buffer_cursor = 0;
-            int buffer_size = 0;
+            int time_size = time.Length;
 
             while (joints.Length - buffer_cursor > 0) {
-                buffer_size = _chunk_size;
-                if (joints.Length - buffer_cursor < _chunk_size) { buffer_size = joints.Length - buffer_cursor; }
+                int buffer_size = _chunk_size;
+                if (joints.Length - buffer_cursor + time_size < _chunk_size) { buffer_size = joints.Length - buffer_cursor + time_size; }
+                int data_size = buffer_size - time_size;
                 buffer = new byte[buffer_size];
 
-                Array.Copy(joints, buffer_cursor, buffer, 0, buffer_size);
-                //Console.WriteLine("Skeleton [{0}/{1}] sended (buffer size: {2})", buffer_cursor, joints.Length, buffer_size);
+                Array.Copy(time, 0, buffer, 0, time_size);
+                Array.Copy(joints, buffer_cursor, buffer, 0, data_size);
                 _client_skeleton.Send(buffer, buffer_size);
-                buffer_cursor += buffer_size;
+                buffer_cursor += data_size;
             }
 
             //Console.WriteLine("Skeleton Sended at {0}:{1} [{2}]", _address, _port, timestamp);
@@ -62,15 +65,14 @@ namespace iuF
             byte[] time = BitConverter.GetBytes((Int64)timestamp);
 
             int buffer_cursor = 0;
-            int buffer_size = 0;
-            int data_size = 0;
             int time_size = time.Length;
 
             while (pixels.Length - buffer_cursor > 0) {
-                buffer_size = _chunk_size;
+                int buffer_size = _chunk_size;
                 if (pixels.Length - buffer_cursor + time_size < _chunk_size) { buffer_size = pixels.Length - buffer_cursor + time_size; }
+                int data_size = buffer_size - time_size;
+
                 buffer = new byte[buffer_size];
-                data_size = buffer_size - time_size;
 
                 Array.Copy(time, 0, buffer, 0, time_size);
                 Array.Copy(pixels, buffer_cursor, buffer, 0, data_size);

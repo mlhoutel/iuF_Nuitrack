@@ -256,8 +256,8 @@ namespace iuF {
 		private void ExtractJoints() {
 			if (_skeletonData != null) {
 				int nb_skeletons = _skeletonData.NumUsers;
-				int size_joint = 1 * sizeof(int) + 3 * sizeof(float);
-				int size_skeletons = nb_skeletons * 25 * size_joint;
+				int size_joint = 13; // Type: [1 byte] Position: [3 * 4 bytes]
+				int size_skeletons = nb_skeletons * 24 * size_joint;
 
 				_joints = new byte[size_skeletons];
 				for (int i = 0; i < nb_skeletons; i++) {
@@ -267,7 +267,7 @@ namespace iuF {
 						//Console.WriteLine("[{0}] Type: {1} ({2}, {3}, {4})", i, joint.Type, joint.Proj.X, joint.Proj.Y, joint.Proj.Z);
 
 						//byte[] user_id = BitConverter.GetBytes(j);
-						byte[] joint_type = BitConverter.GetBytes((int)joint.Type);
+						byte[] joint_type = BitConverter.GetBytes((byte)joint.Type);
 						byte[] joint_x = BitConverter.GetBytes(joint.Proj.X);
 						byte[] joint_y = BitConverter.GetBytes(joint.Proj.Y);
 						byte[] joint_z = BitConverter.GetBytes(joint.Proj.Z);
@@ -285,7 +285,7 @@ namespace iuF {
 		private void ExtractPixels() {
 			if (_depthFrame != null && _colorFrame != null) {
 				int nb_pixels = _configVideo.height * _configVideo.width;
-				int size_pixel = 16; // Depth:  [3 * 4 bytes], Color: [3 * 1 bytes] +1???
+				int size_pixel = 16; // Depth:  [3 * 4 bytes], Color: [3 * 1 bytes] (+ 1?)
 				int size_frame = nb_pixels * size_pixel;
 				_pixels = new byte[size_frame];
 
