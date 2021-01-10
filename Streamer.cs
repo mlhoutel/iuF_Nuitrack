@@ -9,27 +9,33 @@ namespace iuF
     public class Streamer
     {
         private string _address;
-        private int _port;
+        private int _port_skeleton;
+        private int _port_pixels;
+
         private int _chunk_size;
-        private UdpClient _client;
-        public Streamer(string address, int port)
+        private UdpClient _client_skeleton;
+        private UdpClient _client_pixels;
+        public Streamer(string address, int port_skeleton, int port_pixels)
         {
             _address = address;
-            _port = port;
-            _client = new UdpClient();
+            _port_skeleton = port_skeleton;
+            _port_pixels = port_pixels;
+
+            _client_skeleton = new UdpClient();
+            _client_pixels = new UdpClient();
+
             _chunk_size = 1500 - 20 - 8;
         }
 
         public bool TryConnect() {
-            try {
-                _client.Connect(_address, _port);
-                Console.WriteLine("{0}:{1} Connected", _address, _port);
-                return true;
-            }
-            catch (Exception e) {
-                Console.WriteLine("Failed to connect to {0}:{1}", _address, _port);
-                return false;
-            }
+            try { _client_skeleton.Connect(_address, _port_skeleton); }
+            catch (Exception e) { Console.WriteLine("Failed to connect to {0}:{1}", _address, _port_skeleton); return false; }
+
+            try {_client_pixels.Connect(_address, _port_pixels); }
+            catch (Exception e) { Console.WriteLine("Failed to connect to {0}:{1}", _address, _port_pixels); return false; }
+
+            Console.WriteLine("{0} Connected\nStreaming:\n * Skeleton on port {1}\n * Pixels on port {2}", _address, _port_skeleton, _port_pixels);
+            return true;
         }
 
         public void SendSkeleton(byte[] joints, ulong timestamp) {
@@ -44,7 +50,7 @@ namespace iuF
 
                 Array.Copy(joints, buffer_cursor, buffer, 0, buffer_size);
                 //Console.WriteLine("Skeleton [{0}/{1}] sended (buffer size: {2})", buffer_cursor, joints.Length, buffer_size);
-                _client.Send(buffer, buffer_size);
+                _client_skeleton.Send(buffer, buffer_size);
                 buffer_cursor += buffer_size;
             }
 
@@ -69,7 +75,7 @@ namespace iuF
                 Array.Copy(time, 0, buffer, 0, time_size);
                 Array.Copy(pixels, buffer_cursor, buffer, 0, data_size);
                 //Console.WriteLine("Pixels [{0}/{1}] sended (buffer size: {2})", buffer_cursor, pixels.Length, buffer_size); 
-                _client.Send(buffer, buffer_size);
+                _client_pixels.Send(buffer, buffer_size);
                 buffer_cursor += data_size;
             }
 

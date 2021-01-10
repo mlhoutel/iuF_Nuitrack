@@ -83,37 +83,39 @@ namespace iuF {
 		}
 		private Streamer SelectStreamer() {
 			Console.Clear();
-			Console.WriteLine("Enter the address to stream to or just press ENTER to select 127.0.0.1:8080");
+			Console.WriteLine("Enter the address to stream to as IP_ADRESS:PORT_SKELETON:PORT_PIXELS (ex: 127.0.0.1:8080:8081)\nOr just press ENTER to select 127.0.0.1:8080 (skeleton) / 127.0.0.1:8081 (pixels)");
 
 			string address = "127.0.0.1";
-			int port = 8080;
+			int port_skeleton = 8080;
+			int port_pixels = 8081;
 
 			while (true) {
 				string input = Console.ReadLine();
 				bool connecting = false;
 				if (input == "") {
 					address = "127.0.0.1";
-					port = 8080;
+					port_skeleton = 8080;
+					port_pixels = 8081;
 					connecting = true;
 				}
 				string[] inputs = input.Split(':');
-				if (inputs.Length == 2) {
+				if (inputs.Length == 3) {
 
-					if (System.Net.IPAddress.TryParse(inputs[0], out System.Net.IPAddress IPtemp) && int.TryParse(inputs[1], out port)) {
+					if (System.Net.IPAddress.TryParse(inputs[0], out System.Net.IPAddress IPtemp) && int.TryParse(inputs[1], out port_skeleton) && int.TryParse(inputs[2], out port_pixels)) {
 						address = inputs[0];
 						connecting = true;
 					}
 				}
 
-				Console.SetCursorPosition(0, 1); Console.Write(new string(' ', Console.WindowWidth));
 				Console.SetCursorPosition(0, 2); Console.Write(new string(' ', Console.WindowWidth));
-				Console.SetCursorPosition(0, 1);
+				Console.SetCursorPosition(0, 3); Console.Write(new string(' ', Console.WindowWidth));
+				Console.SetCursorPosition(0, 2);
 
 				if (connecting) {
-					Streamer streamer = new Streamer(address, port);
+					Streamer streamer = new Streamer(address, port_skeleton, port_pixels);
 					if (streamer.TryConnect()) { return streamer; }
 				} else {
-					Console.WriteLine("Bad entry: the address must be in the format IP.ADDRESS:PORT (ex: 127.0.0.1:8080)");
+					Console.WriteLine("Bad entry: the address must be in the format IP_ADRESS:PORT_SKELETON:PORT_PIXELS (ex: 127.0.0.1:8080:8081)");
 				}
 			}
 		}
@@ -283,7 +285,7 @@ namespace iuF {
 		private void ExtractPixels() {
 			if (_depthFrame != null && _colorFrame != null) {
 				int nb_pixels = _configVideo.height * _configVideo.width;
-				int size_pixel = 15; // Depth:  [3 * 4 bytes], Color: [3 * 1 bytes]
+				int size_pixel = 16; // Depth:  [3 * 4 bytes], Color: [3 * 1 bytes] +1???
 				int size_frame = nb_pixels * size_pixel;
 				_pixels = new byte[size_frame];
 
@@ -318,7 +320,8 @@ namespace iuF {
 								_pixels[pixel_cursor] = colors[color_cursor];
 								color_cursor++;  pixel_cursor++;
 							}
-
+							_pixels[pixel_cursor] = (byte)0;
+							pixel_cursor++;
 							//Console.WriteLine("[{0}] Depth: ({1}, {2}, {3}) Color: ({4}, {5}, {6})", index, BitConverter.ToUInt16(new byte[] { _pixels[pixel_cursor - 9], _pixels[pixel_cursor - 8] }, 0), BitConverter.ToUInt16(new byte[] { _pixels[pixel_cursor - 7], _pixels[pixel_cursor - 6] }, 0), BitConverter.ToUInt16(new byte[] { _pixels[pixel_cursor - 5], _pixels[pixel_cursor - 4] }, 0), _pixels[pixel_cursor - 3], _pixels[pixel_cursor - 2], _pixels[pixel_cursor - 1]);
 						}
 					}
