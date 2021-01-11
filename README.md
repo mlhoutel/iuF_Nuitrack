@@ -2,9 +2,20 @@
 
 See the First Part: [iuF_Intel_Realsense](https://github.com/mlhoutel/iuF_Intel_Realsense)
 
-## Testing receiving datas
+## Second Step: Exporting the Datas with UDP
 
-Launch the program with default values
+## Cmd and GUI versions
+<img src="ScreenShots/Screenshot1.PNG" width="700">
+
+[Browse the CMD versions](https://github.com/mlhoutel/iuF_Nuitrack)
+
+<img src="ScreenShots/Screenshot2.PNG" width="700">
+
+[Browse the GUI versions](https://github.com/mlhoutel/iuF_Nuitrack/edit/feature/GUI)
+
+## Testing Sending
+
+Launch the program with the localhost address
 
 install netcat [Windows](https://github.com/diegocr/netcat)
 
@@ -12,21 +23,19 @@ install netcat [Windows](https://github.com/diegocr/netcat)
 nc -lvu 127.0.0.1 -p 8080
 ```
 
-## Test with a Unity project
+## Send to Unity
 
 1. Install Unity
 
-2. Install the Unity Plugin https://github.com/Theia-VR/UnityPlugin
+2. Install the Unity Plugin [Here](https://github.com/Theia-VR/UnityPlugin)
 
-3. Create a 3D Unity project
+3. Create a 3D Unity project and follow the instruction from [Here](https://github.com/Theia-VR/UnityPlugin/blob/master/README.md#how-to-use)
 
-###
-
-Data format:
+### Streamed Data Formats
 
 ```
 Vertexs (Depth and Color)
-----------------------
+-------------------------------
 Beggining of the Chunk:
 - TimeStamp (8bytes)
 ...
@@ -42,7 +51,7 @@ Beggining of the Chunk:
 
 ```
 Skeleton (Joints)
-----------------------
+-------------------------------
 Beggining of the Chunk:
 - TimeStamp (8bytes)
 ...
@@ -51,9 +60,7 @@ Beggining of the Chunk:
 - X: x position		(4 byte)
 - Y: y position		(4 byte)
 - Z: z position		(4 byte)
-```
-
-```
+-------------------------------
 Joints Types:
     None = 0,
     Head = 1,
