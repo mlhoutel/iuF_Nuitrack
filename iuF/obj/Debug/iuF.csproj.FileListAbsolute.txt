@@ -1,0 +1,17 @@
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\Debug\iuF.exe.config
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\Debug\iuF.exe
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\Debug\iuF.pdb
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\Debug\nuitrack.net.dll
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.csprojAssemblyReference.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\MainWindow.g.cs
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\App.g.cs
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF_MarkupCompile.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF_MarkupCompile.lref
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\MainWindow.baml
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.g.resources
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.Properties.Resources.resources
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.csproj.GenerateResource.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.csproj.CoreCompileInputs.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.csproj.CopyComplete
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.exe
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\Debug\iuF.pdb

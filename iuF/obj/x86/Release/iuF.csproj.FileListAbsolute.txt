@@ -1,0 +1,17 @@
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.csprojAssemblyReference.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\MainWindow.g.cs
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\App.g.cs
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF_MarkupCompile.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF_MarkupCompile.lref
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\x86\Release\iuF.exe.config
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\x86\Release\iuF.exe
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\x86\Release\iuF.pdb
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\bin\x86\Release\nuitrack.net.dll
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\MainWindow.baml
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.g.resources
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.Properties.Resources.resources
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.csproj.GenerateResource.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.csproj.CoreCompileInputs.cache
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.csproj.CopyComplete
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.exe
+D:\Documents\IMT\iuF\iuF_Nuitrack\iuF\obj\x86\Release\iuF.pdb
