@@ -33,13 +33,13 @@
         </Grid>
         <StackPanel Grid.Row="1">
             <Label Content="Camera" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,10,10,0" />
-            <ComboBox HorizontalAlignment="Left" Height="33" VerticalAlignment="Top" Width="200" Margin="10,0,10,0"  />
+            <ComboBox ItemsSource="{Binding Cameras}" SelectedIndex="{Binding Path=Camera, Mode=TwoWay}" FontWeight="Medium" FontSize="14" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="33" VerticalAlignment="Top" Width="200" Margin="10,0,10,0" SelectionChanged="Cameras_SelectionChanged"  />
 
             <Label Content="Configuration" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="10,10,10,0" />
-            <ComboBox HorizontalAlignment="Left" Height="33" VerticalAlignment="Top" Width="200" Margin="10,0,10,0" />
+            <ComboBox ItemsSource="{Binding Configurations}" SelectedIndex="{Binding Path=Configuration, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" VerticalAlignment="Top" Width="200" FontWeight="Medium" FontSize="14" VerticalContentAlignment="Center" Margin="10,0,10,0" SelectionChanged="Configurations_SelectionChanged" />
 
             <Label Content="License" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,10,10,0" />
-            <TextBox HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15"  VerticalAlignment="Top" VerticalContentAlignment="Center" Width="200" Margin="10,0,10,0"/>
+            <TextBox x:Name="LicenseText" LostFocus="License_LostFocus" KeyDown="License_KeyDown" Text="{Binding Path=License, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="200" Margin="10,0,10,0"/>
         </StackPanel>
 
 
@@ -107,12 +107,12 @@
         </StackPanel>
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
             <Label Content="Console" Foreground="#c2c2d1" Background="#2e2e40" Width="650" FontWeight="Medium" FontSize="13" HorizontalAlignment="Left" VerticalAlignment="Center" Height="25"/>
-            <RichTextBox Height="100" Background="#2b2b30" BorderThickness="0" Foreground="White" FontWeight="Medium" FontSize="11" IsReadOnly="True">
-                <FlowDocument>
-                    <Paragraph>
-                        <Run Text="Default Log"/>
-                    </Paragraph>
-                </FlowDocument>
+            <RichTextBox x:Name="Console" ScrollViewer.VerticalScrollBarVisibility="Auto" Height="100" FontFamily="Fonts/#Consolas" Background="#2b2b30" BorderThickness="0" Foreground="White" FontWeight="Medium" FontSize="11" IsReadOnly="True">
+                <RichTextBox.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="0" />
+                    </Style>
+                </RichTextBox.Resources>
             </RichTextBox>
         </StackPanel>
     </Grid>

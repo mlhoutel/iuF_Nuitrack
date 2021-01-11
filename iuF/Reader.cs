@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 
@@ -36,26 +37,28 @@ namespace iuF {
 			while (_running) { Step(); }
 			Stop();
 		}
-		
-		private void Initialize() {
-			try {
-				Nuitrack.Init("");
-			}
-			catch (nuitrack.Exception exception) {
-				Console.WriteLine("Cannot initialize Nuitrack.");
-				throw exception;
-			}
+
+		public string Initialize() {
+			try { Nuitrack.Init(""); }
+			catch (nuitrack.Exception e) { return "Error: Cannot initialize Nuitrack (" + e.ToString() + ")"; }
+			return "Nuitrack Initialized...";
+		}
+		private void Setup() {
+			/*
 			// Select the device
 			_device = SelectDevice();
 
 			// Select video configurations
 			_configVideo = SelectVideoMode();
 
-
 			// Activate the license
 			ActivateDevice();
 
 			Nuitrack.SetDevice(_device);
+
+			// Connect to remote
+			_streamer = SelectStreamer();
+			*/
 
 			// Add modules Sensors
 			_depthSensor = DepthSensor.Create();
@@ -71,8 +74,6 @@ namespace iuF {
 			_userTracker.OnLostUserEvent += onUserTrackerLostUser;
 			_skeletonTracker.OnSkeletonUpdateEvent += onSkeletonUpdate;
 
-			// Connect to remote
-			_streamer = SelectStreamer();
 
 
 			// Run Nuitrack
@@ -120,7 +121,76 @@ namespace iuF {
 			}
 		}
 
-		private NuitrackDevice SelectDevice() {
+		public string getDevices(out ObservableCollection<string> device_list) {
+			device_list = new ObservableCollection<string>();
+
+			// List availaible devices
+			List<NuitrackDevice> devices = Nuitrack.GetDeviceList();
+			int devices_count = devices.Count;
+			if (devices_count == 0) { return "Error: there is no connected devices."; }
+			for (int i = 0; i < devices_count; i++) { device_list.Add(devices[i].GetInfo(DeviceInfoType.DEVICE_NAME)); }
+			return "Devices loaded (" + devices_count + " devices detected)";
+		}
+		public string setDevice(int index) {
+
+			List<NuitrackDevice> devices = Nuitrack.GetDeviceList();
+			int devices_count = devices.Count;
+			if (index >= 0 && index < devices_count) { 
+				_device = devices[index];
+				return "Loading Configurations...";
+			}
+			return "Error during the device selection: The selected device must have been unplugged";
+		}
+		public string getConfigurations(out ObservableCollection<string> configurations_list) {
+			configurations_list = new ObservableCollection<string>();
+
+			// List availaible devices
+			List<VideoMode> modes = _device.GetAvailableVideoModes(StreamType.DEPTH);
+			int modes_count = modes.Count;
+			if (modes_count == 0) { return "Error: there is no video mode for this device."; }
+			for (int i = 0; i < modes_count; i++) { configurations_list.Add(modes[i].width + "x" + modes[i].height + "@" + modes[i].fps + "fps"); }
+			return "Configurations loaded (" + modes_count + " configurations detected)";
+		}
+		public string setConfiguration(int index) {
+
+			List<VideoMode> modes = _device.GetAvailableVideoModes(StreamType.DEPTH);
+			int modes_count = modes.Count;
+			if (index >= 0 && index < modes_count) {
+				_configVideo = modes[index];
+				return "Checking License...";
+			}
+			return "Error during the configurations selection: The selected device must have been unplugged";
+		}
+		public string getLicense(out string license) {
+			bool device_activated = Convert.ToBoolean(_device.GetActivationStatus());
+			license = "";
+			if (device_activated) { license = "Device Activated"; return "Device Activated (" + _device.GetActivationStatus().ToString() + ")"; }
+			return "The device is not activated. Enter your license key (or get one at https://cognitive.3divi.com/app/nuitrack/dashboard/)";
+			
+		}
+		public string setLicense(string license) {
+			bool device_activated = false;
+			try {
+				_device.Activate(license);
+				device_activated = Convert.ToBoolean(_device.GetActivationStatus());
+				if (device_activated) { return "Device activated succefully"; }
+			}
+			catch { }
+			
+			return "Error during the device activation. Check your license key (or get one at https://cognitive.3divi.com/app/nuitrack/dashboard/)";
+		}
+		private void ActivateDevice() {
+			bool device_activated = Convert.ToBoolean(_device.GetActivationStatus());
+			Console.Clear();
+			while (!device_activated) {
+				Console.WriteLine("Your device license is not activated\nEnter the activation key (or get one at https://cognitive.3divi.com/app/nuitrack/dashboard/): ");
+				string activationKey = Console.ReadLine();
+				_device.Activate(activationKey);
+				device_activated = Convert.ToBoolean(_device.GetActivationStatus());
+			}
+			Console.WriteLine("Activation status: {0}", _device.GetActivationStatus().ToString());
+		}
+		private NuitrackDevice SelectDevice(int index) {
 
 			// List availaible devices
 			List<NuitrackDevice> devices = Nuitrack.GetDeviceList();
@@ -203,17 +273,6 @@ namespace iuF {
 			_device.SetVideoMode(StreamType.DEPTH, modes[selected]);
 			_device.SetVideoMode(StreamType.COLOR, modes[selected]);
 			return modes[selected];
-		}
-		private void ActivateDevice() {
-			bool device_activated = Convert.ToBoolean(_device.GetActivationStatus());
-			Console.Clear();
-			while (!device_activated) {
-				Console.WriteLine("Your device license is not activated\nEnter the activation key (or get one at https://cognitive.3divi.com/app/nuitrack/dashboard/): ");
-				string activationKey = Console.ReadLine();
-				_device.Activate(activationKey);
-				device_activated = Convert.ToBoolean(_device.GetActivationStatus());
-			}
-			Console.WriteLine("Activation status: {0}", _device.GetActivationStatus().ToString());
 		}
 		public void Stop()
         {
