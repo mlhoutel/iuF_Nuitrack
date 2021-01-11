@@ -11,7 +11,7 @@ See the First Part: [iuF_Intel_Realsense](https://github.com/mlhoutel/iuF_Intel_
 
 <img src="ScreenShots/Screenshot2.PNG" width="700">
 
-[Browse the GUI versions](https://github.com/mlhoutel/iuF_Nuitrack/edit/feature/GUI)
+[Browse the GUI versions](https://github.com/mlhoutel/iuF_Nuitrack/tree/feature/GUI)
 
 ## Testing Sending
 
