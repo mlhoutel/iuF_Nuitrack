@@ -47,15 +47,15 @@
             <Label Content="Destinataire" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,10,10,0"  />
 
             <Label Content="Addresse IP" Foreground="#c2c2d1" FontWeight="Medium" FontSize="11" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,0,10,-5"  />
-            <TextBox Text="127.0.0.1" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="10,0,10,0" TextWrapping="Wrap"  Width="310"/>
+            <TextBox Text="{Binding Path=Address, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="10,0,10,0" TextWrapping="Wrap"  Width="310"/>
 
             <Label Content="Port Squelette" Foreground="#c2c2d1" FontWeight="Medium" FontSize="11" HorizontalAlignment="Left" VerticalAlignment="Top" Width="160" Margin="10,0,10,-5"  />
-            <TextBox Text="8080" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="10,0,10,0" TextWrapping="Wrap" Width="160" />
-            <CheckBox Content="Envoyer le Squelette" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="180,-25,0,0" Foreground="White" FontWeight="Medium" FontSize="11"/>
+            <TextBox Text="{Binding Path=Port_Skeleton, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="10,0,10,0" TextWrapping="Wrap" Width="160" />
+            <CheckBox IsChecked="{Binding Path=Send_Skeleton, Mode=TwoWay}" Content="Envoyer le Squelette" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="180,-25,0,0" Foreground="White" FontWeight="Medium" FontSize="11"/>
 
             <Label Content="Port Points" Foreground="#c2c2d1" FontWeight="Medium" FontSize="11" HorizontalAlignment="Left" VerticalAlignment="Top" Width="160" Margin="10,0,10,-5"  />
-            <TextBox Text="8081" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="10,0,10,0" TextWrapping="Wrap" Width="160"/>
-            <CheckBox Content="Envoyer les Points" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="180,-25,0,0" Foreground="White" FontWeight="Medium" FontSize="11"/>
+            <TextBox Text="{Binding Path=Port_Pixels, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="10,0,10,0" TextWrapping="Wrap" Width="160"/>
+            <CheckBox IsChecked="{Binding Path=Send_Pixels, Mode=TwoWay}" Content="Envoyer les Points" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="180,-25,0,0" Foreground="White" FontWeight="Medium" FontSize="11"/>
 
             <Grid Height="25">
                 <Grid.ColumnDefinitions>
