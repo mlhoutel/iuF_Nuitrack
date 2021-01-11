@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Text;
 
 
@@ -28,12 +29,25 @@ namespace iuF {
 		private byte[] _joints; // {User, Type, XReal, YReal, ZReal} for each joints
 		private byte[] _pixels; // {X, Y, Depth, ColorR, ColorG, ColorB} for each pixel
 
+		private bool _send_joints;
+		private bool _send_pixels;
+
+		public bool Send_Joints {
+			get { return _send_joints; }
+			set { _send_joints = value; }
+		}
+		public bool Send_Pixels {
+			get { return _send_pixels; }
+			set { _send_pixels = value; }
+		}
+
 		public Reader() {
 			_running = false;
+			_send_joints = true;
+			_send_pixels = true;
 		}
 
 		public void Run() {
-			Initialize();
 			while (_running) { Step(); }
 			Stop();
 		}
@@ -43,23 +57,7 @@ namespace iuF {
 			catch (nuitrack.Exception e) { return "Error: Cannot initialize Nuitrack (" + e.ToString() + ")"; }
 			return "Nuitrack Initialized...";
 		}
-		private void Setup() {
-			/*
-			// Select the device
-			_device = SelectDevice();
-
-			// Select video configurations
-			_configVideo = SelectVideoMode();
-
-			// Activate the license
-			ActivateDevice();
-
-			Nuitrack.SetDevice(_device);
-
-			// Connect to remote
-			_streamer = SelectStreamer();
-			*/
-
+		public void Setup() {
 			// Add modules Sensors
 			_depthSensor = DepthSensor.Create();
 			_colorSensor = ColorSensor.Create();
@@ -74,13 +72,28 @@ namespace iuF {
 			_userTracker.OnLostUserEvent += onUserTrackerLostUser;
 			_skeletonTracker.OnSkeletonUpdateEvent += onSkeletonUpdate;
 
-
-
 			// Run Nuitrack
 			Nuitrack.Run();
 			_running = true;
 			
 			Console.WriteLine("Nuitrack is Running...");
+		}
+		
+		public string setStreamer(string address, string port_skeleton, string port_pixels, out bool connecting) {
+			connecting = false;
+			int temp_port_skeleton;
+			int temp_port_pixels;
+			if (!IPAddress.TryParse(address, out System.Net.IPAddress IPtemp)) { return "Error, the Address (" + address + ") could not be parsed as an IP (ex: 127.0.0.1)"; }
+			if (!int.TryParse(port_skeleton, out temp_port_skeleton)) { return "Error, the Skeleton port (" + port_skeleton + ") could not be parsed as an integer (ex: 8080)"; }
+			if (!int.TryParse(port_pixels, out temp_port_pixels)) { return "Error, the Pixels port (" + port_pixels + ") could not be parsed as an integer (ex: 8081)"; }
+
+			Streamer streamer = new Streamer(address, temp_port_skeleton, temp_port_pixels);
+			if (streamer.TryConnect()) {
+				connecting = true;
+				_streamer = streamer;
+				return "Succefully connected to " + address + ":" + temp_port_skeleton + " and " + address + ":" + temp_port_pixels;
+			}
+			return "Error, could not reach " + address + ":" + temp_port_skeleton + " or " + address + ":" + temp_port_pixels;
 		}
 		private Streamer SelectStreamer() {
 			Console.Clear();
@@ -297,20 +310,25 @@ namespace iuF {
 
 			// We wait for the arrays to be populated
 			try {
-				Nuitrack.WaitUpdate(_depthSensor);
-				Nuitrack.WaitUpdate(_colorSensor);
-				Nuitrack.WaitUpdate(_skeletonTracker);
+				if (_send_joints) {
+					Nuitrack.WaitUpdate(_skeletonTracker);
+				}
+				if (_send_pixels) {
+					Nuitrack.WaitUpdate(_depthSensor);
+					Nuitrack.WaitUpdate(_colorSensor);
+				}
 			}
 			catch (LicenseNotAcquiredException exception) { Console.WriteLine("LicenseNotAcquired exception. Exception: {0}", exception.ToString()); }
 			catch (System.Exception exception) { Console.WriteLine("Nuitrack update failed. Exception: {0}", exception.ToString()); }
 
 			// We then format the datas in an array of bytes
-			ExtractJoints();
-			ExtractPixels();
+
+			if (_send_joints) { ExtractJoints(); }
+			if (_send_pixels) { ExtractPixels(); }
 
 			// Finaly we give the data to the Streamer
-			_streamer.SendSkeleton(_pixels, _skeletonData.Timestamp);
-			_streamer.SendPixels(_pixels, _skeletonData.Timestamp);
+			if (_send_joints) { _streamer.SendSkeleton(_pixels, _skeletonData.Timestamp); }
+			if (_send_pixels) { _streamer.SendPixels(_pixels, _skeletonData.Timestamp); }
 		}
 		private void ExtractJoints() {
 			if (_skeletonData != null) {

@@ -35,6 +35,8 @@ namespace iuF {
             _port_pixels = "8081";
             _address = "127.0.0.1";
             _license = "";
+            _send_skeleton = true;
+            _send_pixels = true;
             _cameras = new ObservableCollection<string>();
             _configurations = new ObservableCollection<string>();
 
@@ -42,12 +44,12 @@ namespace iuF {
             DataContext = this;
             InitializeComponent();
 
-           PrintLog("Console Initialized...");
-           PrintLog(_reader.Initialize());
+            PrintLog("Console Initialized...");
+            PrintLog(_reader.Initialize());
 
             LoadCameras();
         }
-        private void Bar_MouseDown(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) { DragMove(); }}
+        private void Bar_MouseDown(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) { DragMove(); } }
         private void Minimize_MouseClick(object sender, RoutedEventArgs e) { this.WindowState = WindowState.Minimized; }
         private void Close_MouseClick(object sender, RoutedEventArgs e) { Close(); }
 
@@ -68,12 +70,11 @@ namespace iuF {
             string temp_license = "";
             PrintLog(_reader.getLicense(out temp_license));
             License = temp_license;
-            if (License == "Device Activated") { LicenseText.IsReadOnly = true; LicenseText.Opacity = 0.7; }
-            else { LicenseText.IsReadOnly = false; LicenseText.Opacity = 1; }
+            if (License == "Device Activated") { LicenseText.IsEnabled = false; LicenseText.Opacity = 0.7; RightPannel.IsEnabled = true; } else { LicenseText.IsEnabled = true; LicenseText.Opacity = 1; }
         }
         private void SendLicense() { PrintLog(_reader.setLicense(_license)); }
         public void PrintLog(string output) {
-            Console.AppendText("\r\n" + output );
+            Console.AppendText("\r\n" + output);
             Console.ScrollToEnd();
         }
         public ObservableCollection<string> Cameras {
@@ -132,10 +133,43 @@ namespace iuF {
             PrintLog(_reader.setConfiguration(_configuration));
             LoadLicense();
         }
-        private void License_LostFocus(object sender, RoutedEventArgs e) { SendLicense(); }
-        private void License_KeyDown(object sender, KeyEventArgs e) {
-            if (e.Key == Key.Enter) { SendLicense(); }
+        private void License_LostFocus(object sender, RoutedEventArgs e) {
+            if (LicenseText.IsEnabled == true) { SendLicense(); }
         }
+        private void License_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Enter && LicenseText.IsEnabled == true) { SendLicense(); }
+        }
+        private void Send_Click(object sender, RoutedEventArgs e) {
+            bool connected = false;
+            PrintLog(_reader.setStreamer(_address, _port_skeleton, _port_pixels, out connected));
 
+            if (connected) {
+                _reader.Send_Joints = _send_skeleton;
+                _reader.Send_Pixels = _send_pixels;
+
+                string msg = "Streaming datas: Sending Joints [";
+                if (_send_skeleton) { msg += "X";  } else { msg += " "; }
+                msg += "] Sending Pixels [";
+                if (_send_pixels) { msg += "X"; } else { msg += " "; }
+                msg += "]";
+
+                LeftPannel.IsEnabled = false;
+                RightPannel.IsEnabled = false;
+
+                Stop_Button.IsEnabled = true; Stop_Button.Opacity = 1;
+                Send_Button.IsEnabled = false; Send_Button.Opacity = 0.8;
+
+                _reader.Setup();
+                PrintLog(msg);
+            }
+        }
+        private void Stop_Click(object sender, RoutedEventArgs e) {
+            PrintLog("Stop...");
+            LeftPannel.IsEnabled = true;
+            RightPannel.IsEnabled = true;
+
+            Stop_Button.IsEnabled = false; Stop_Button.Opacity = 0.8;
+            Send_Button.IsEnabled = true; Send_Button.Opacity = 1;
+        }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iuF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="380" Width="650"
+        Title="MainWindow" Height="400" Width="650"
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="#181735">
@@ -13,7 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="125"/>
+            <RowDefinition Height="160"/>
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
@@ -31,7 +31,7 @@
             <Button Click="Minimize_MouseClick" Content="_" Foreground="White" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,30,0" FontWeight="UltraBold" FontSize="12" BorderThickness="0" Background="Transparent" Height="25" Width="30"/>
             <Button Click="Close_MouseClick" Content="X" Foreground="White" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="UltraBold" FontSize="12" BorderThickness="0" Background="Transparent" Height="25" Width="30"/>
         </Grid>
-        <StackPanel Grid.Row="1">
+        <StackPanel x:Name="LeftPannel" Grid.Row="1">
             <Label Content="Camera" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,10,10,0" />
             <ComboBox ItemsSource="{Binding Cameras}" SelectedIndex="{Binding Path=Camera, Mode=TwoWay}" FontWeight="Medium" FontSize="14" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="33" VerticalAlignment="Top" Width="200" Margin="10,0,10,0" SelectionChanged="Cameras_SelectionChanged"  />
 
@@ -43,7 +43,7 @@
         </StackPanel>
 
 
-        <StackPanel Grid.Row="1" Grid.Column="1">
+        <StackPanel x:Name="RightPannel" Grid.Row="1" Grid.Column="1" IsEnabled="False">
             <Label Content="Destinataire" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,10,10,0"  />
 
             <Label Content="Addresse IP" Foreground="#c2c2d1" FontWeight="Medium" FontSize="11" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,0,10,-5"  />
@@ -57,14 +57,17 @@
             <TextBox Text="{Binding Path=Port_Pixels, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="10,0,10,0" TextWrapping="Wrap" Width="160"/>
             <CheckBox IsChecked="{Binding Path=Send_Pixels, Mode=TwoWay}" Content="Envoyer les Points" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="180,-25,0,0" Foreground="White" FontWeight="Medium" FontSize="11"/>
 
-            <Grid Height="25">
+            
+        </StackPanel>
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
+            <Grid x:Name="Button_Grid" Height="25" Margin="0,0,10,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="95"/>
                     <ColumnDefinition Width="95"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Content="Envoyer" Grid.Column="1" Foreground="White" FontSize="13" FontWeight="Medium">
+                <Button x:Name="Send_Button" Content="Envoyer" Click="Send_Click" Grid.Column="1" Foreground="White" FontSize="13" FontWeight="Medium" Height="25" VerticalAlignment="Top">
                     <Button.Style>
                         <Style TargetType="Button">
                             <Setter Property="Background" Value="#FE6584"/>
@@ -81,9 +84,10 @@
                             <Border Width="90" Height="25" CornerRadius="12" Background="{TemplateBinding Background}">
                                 <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             </Border>
-                        </ControlTemplate></Button.Template>
+                        </ControlTemplate>
+                    </Button.Template>
                 </Button>
-                <Button Content="Stopper" Grid.Column="2" Foreground="#c2c2d1" FontSize="12" FontWeight="Medium">
+                <Button x:Name="Stop_Button" Opacity="0.8" IsEnabled="False" Content="Stopper" Click="Stop_Click" Grid.Column="2" Foreground="#c2c2d1" FontSize="12" FontWeight="Medium">
                     <Button.Style>
                         <Style TargetType="Button">
                             <Setter Property="Background" Value="#39385B"/>
@@ -104,8 +108,6 @@
                     </Button.Template>
                 </Button>
             </Grid>
-        </StackPanel>
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
             <Label Content="Console" Foreground="#c2c2d1" Background="#2e2e40" Width="650" FontWeight="Medium" FontSize="13" HorizontalAlignment="Left" VerticalAlignment="Center" Height="25"/>
             <RichTextBox x:Name="Console" ScrollViewer.VerticalScrollBarVisibility="Auto" Height="100" FontFamily="Fonts/#Consolas" Background="#2b2b30" BorderThickness="0" Foreground="White" FontWeight="Medium" FontSize="11" IsReadOnly="True">
                 <RichTextBox.Resources>
