@@ -57,7 +57,7 @@ namespace iuF {
 			catch (nuitrack.Exception e) { return "Error: Cannot initialize Nuitrack (" + e.ToString() + ")"; }
 			return "Nuitrack Initialized...";
 		}
-		public void Setup() {
+		public string Setup() {
 			// Add modules Sensors
 			_depthSensor = DepthSensor.Create();
 			_colorSensor = ColorSensor.Create();
@@ -73,10 +73,10 @@ namespace iuF {
 			_skeletonTracker.OnSkeletonUpdateEvent += onSkeletonUpdate;
 
 			// Run Nuitrack
-			Nuitrack.Run();
-			_running = true;
+			try { Nuitrack.Run(); _running = true; }
+			catch (nuitrack.Exception e) { return "An Error Occured during the launching of Nuitrack.";  }
 			
-			Console.WriteLine("Nuitrack is Running...");
+			return "Nuitrack is Running...";
 		}
 		
 		public string setStreamer(string address, string port_skeleton, string port_pixels, out bool connecting) {

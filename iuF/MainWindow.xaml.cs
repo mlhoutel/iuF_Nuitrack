@@ -147,9 +147,9 @@ namespace iuF {
                 _reader.Send_Joints = _send_skeleton;
                 _reader.Send_Pixels = _send_pixels;
 
-                string msg = "Streaming datas: Sending Joints [";
+                string msg = "\nStreaming datas:\n * Sending Joints [";
                 if (_send_skeleton) { msg += "X";  } else { msg += " "; }
-                msg += "] Sending Pixels [";
+                msg += "]\n * Sending Pixels [";
                 if (_send_pixels) { msg += "X"; } else { msg += " "; }
                 msg += "]";
 
@@ -158,13 +158,16 @@ namespace iuF {
 
                 Stop_Button.IsEnabled = true; Stop_Button.Opacity = 1;
                 Send_Button.IsEnabled = false; Send_Button.Opacity = 0.8;
+                PrintLog(msg);
 
                 _reader.Setup();
-                PrintLog(msg);
+                _reader.Run();
             }
         }
         private void Stop_Click(object sender, RoutedEventArgs e) {
-            PrintLog("Stop...");
+            PrintLog("\nStopping...");
+            _reader.Stop();
+            PrintLog("Processus Stopped Succesfully");
             LeftPannel.IsEnabled = true;
             RightPannel.IsEnabled = true;
 
