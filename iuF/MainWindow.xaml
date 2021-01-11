@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iuF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="650"
+        Title="MainWindow" Height="500" Width="550"
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="#181735">
@@ -13,7 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="160"/>
+            <RowDefinition Height="260"/>
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
@@ -32,13 +32,13 @@
             <Button Click="Close_MouseClick" Content="X" Foreground="White" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="UltraBold" FontSize="12" BorderThickness="0" Background="Transparent" Height="25" Width="30"/>
         </Grid>
         <StackPanel x:Name="LeftPannel" Grid.Row="1">
-            <Label Content="Camera" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,10,10,0" />
+            <Label Content="Camera" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,6,10,0" />
             <ComboBox ItemsSource="{Binding Cameras}" SelectedIndex="{Binding Path=Camera, Mode=TwoWay}" FontWeight="Medium" FontSize="14" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="33" VerticalAlignment="Top" Width="200" Margin="10,0,10,0" SelectionChanged="Cameras_SelectionChanged"  />
 
-            <Label Content="Configuration" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="10,10,10,0" />
+            <Label Content="Configuration" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="10,6,10,0" />
             <ComboBox ItemsSource="{Binding Configurations}" SelectedIndex="{Binding Path=Configuration, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" VerticalAlignment="Top" Width="200" FontWeight="Medium" FontSize="14" VerticalContentAlignment="Center" Margin="10,0,10,0" SelectionChanged="Configurations_SelectionChanged" />
 
-            <Label Content="License" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,10,10,0" />
+            <Label Content="License" Foreground="White" FontWeight="Medium" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,6,10,0" />
             <TextBox x:Name="LicenseText" LostFocus="License_LostFocus" KeyDown="License_KeyDown" Text="{Binding Path=License, Mode=TwoWay}" HorizontalAlignment="Left" Height="33" FontWeight="Medium" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="200" Margin="10,0,10,0"/>
         </StackPanel>
 
@@ -109,7 +109,7 @@
                 </Button>
             </Grid>
             <Label Content="Console" Foreground="#c2c2d1" Background="#2e2e40" Width="650" FontWeight="Medium" FontSize="13" HorizontalAlignment="Left" VerticalAlignment="Center" Height="25"/>
-            <RichTextBox x:Name="Console" ScrollViewer.VerticalScrollBarVisibility="Auto" Height="100" FontFamily="Fonts/#Consolas" Background="#2b2b30" BorderThickness="0" Foreground="White" FontWeight="Medium" FontSize="11" IsReadOnly="True">
+            <RichTextBox x:Name="Console" ScrollViewer.VerticalScrollBarVisibility="Auto" Height="200" FontFamily="Fonts/#Consolas" Background="#2b2b30" BorderThickness="0" Foreground="White" FontWeight="Medium" FontSize="11" IsReadOnly="True">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />

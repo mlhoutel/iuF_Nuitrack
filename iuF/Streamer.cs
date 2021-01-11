@@ -24,9 +24,10 @@ namespace iuF
             _client_skeleton = new UdpClient();
             _client_pixels = new UdpClient();
 
-            _chunk_size = 1500 - 20 - 8;
+            _chunk_size = 1500 - 20 - 8; // 20 bytes for the IP Headers, 8 bytes for the UDP Headers
         }
 
+        /* Try to connect to the remote addresses */
         public bool TryConnect() {
             try { _client_skeleton.Connect(_address, _port_skeleton); }
             catch (Exception e) { Console.WriteLine("Failed to connect to {0}:{1}", _address, _port_skeleton); return false; }
@@ -38,9 +39,10 @@ namespace iuF
             return true;
         }
 
+        /* Send the skeletton datas */
         public void SendSkeleton(byte[] joints, ulong timestamp) {
             byte[] buffer;
-            byte[] time = BitConverter.GetBytes((Int64)timestamp);
+            byte[] time = BitConverter.GetBytes((Int64)timestamp); // 8bytes Time Stamp
 
             int buffer_cursor = 0;
             int time_size = time.Length;
@@ -51,18 +53,20 @@ namespace iuF
                 int data_size = buffer_size - time_size;
                 buffer = new byte[buffer_size];
 
-                Array.Copy(time, 0, buffer, 0, time_size);
-                Array.Copy(joints, buffer_cursor, buffer, 0, data_size);
+                Array.Copy(time, 0, buffer, 0, time_size);                // Copy the TimeStamp at the beginning of the buffer
+                Array.Copy(joints, buffer_cursor, buffer, 0, data_size);  // Copy the Joints datas into the buffer
+
+                // Console.WriteLine("Pixels [{0}/{1}] sended (buffer size: {2})", buffer_cursor, joints.Length, buffer_size); 
+
                 _client_skeleton.Send(buffer, buffer_size);
                 buffer_cursor += data_size;
             }
-
-            //Console.WriteLine("Skeleton Sended at {0}:{1} [{2}]", _address, _port, timestamp);
+            // Console.WriteLine("Skeleton Sended at {0}:{1} [{2}]", _address, _port, timestamp);
         }
 
         public void SendPixels(byte[] pixels, ulong timestamp) {
             byte[] buffer;
-            byte[] time = BitConverter.GetBytes((Int64)timestamp);
+            byte[] time = BitConverter.GetBytes((Int64)timestamp); // 8bytes Time Stamp
 
             int buffer_cursor = 0;
             int time_size = time.Length;
@@ -74,13 +78,14 @@ namespace iuF
 
                 buffer = new byte[buffer_size];
 
-                Array.Copy(time, 0, buffer, 0, time_size);
-                Array.Copy(pixels, buffer_cursor, buffer, 0, data_size);
-                //Console.WriteLine("Pixels [{0}/{1}] sended (buffer size: {2})", buffer_cursor, pixels.Length, buffer_size); 
+                Array.Copy(time, 0, buffer, 0, time_size);                // Copy the TimeStamp at the beginning of the buffer
+                Array.Copy(pixels, buffer_cursor, buffer, 0, data_size);  // Copy the Pixels datas into the buffer
+
+                // Console.WriteLine("Pixels [{0}/{1}] sended (buffer size: {2})", buffer_cursor, pixels.Length, buffer_size); 
+
                 _client_pixels.Send(buffer, buffer_size);
                 buffer_cursor += data_size;
             }
-
             //Console.WriteLine("Pixels Sended at {0}:{1} [{2}]", _address, _port, timestamp);
         }
     }

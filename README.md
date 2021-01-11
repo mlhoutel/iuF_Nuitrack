@@ -30,7 +30,7 @@ Vertexs (Depth and Color)
 Beggining of the Chunk:
 - TimeStamp (8bytes)
 ...
-[1280 x 800] Pixels (of 16bytes)
+[1280 x 720] Pixels (of 16bytes)
 - X: x position		(4 byte)
 - Y: y position		(4 byte)
 - Z: z position		(4 byte)
