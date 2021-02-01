@@ -46,7 +46,7 @@ Beggining of the Chunk:
 - R: red color		(1 byte)
 - G: green color	(1 byte)
 - B: blue color		(1 byte)
-- (?)				(1 byte)
+- Type (?)  		(1 byte)
 ```
 
 ```
